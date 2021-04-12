@@ -12,8 +12,7 @@ from deltachat import Chat, Contact, Message
 from deltachat.capi import lib
 from deltachat.cutil import from_dc_charpointer
 from jinja2 import Template
-from simplebot import DeltaBot
-from simplebot.bot import Replies
+from simplebot.bot import DeltaBot, Replies
 
 from .db import DBManager
 
