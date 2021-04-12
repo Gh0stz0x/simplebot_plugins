@@ -13,6 +13,8 @@ class DBManager:
                         gid INTEGER NOT NULL,
                         board TEXT,
                         black TEXT,
+                        p1_wins INTEGER DEFAULT 0,
+                        p2_wins INTEGER DEFAULT 0,
                         PRIMARY KEY(p1,p2))''')
 
     def execute(self, statement: str, args=()) -> sqlite3.Cursor:
@@ -39,6 +41,14 @@ class DBManager:
         p1, p2 = sorted([p1, p2])
         self.commit('UPDATE games SET board=?, black=? WHERE p1=? AND p2=?',
                     (board, black, p1, p2))
+
+    def set_wins(self, p1: str, p2: str, winner: str) -> None:
+        if winner == 'p1':
+            self.commit('UPDATE games SET p1_wins = p1_wins + 1 WHERE p1=? AND p2=?',
+                        (p1, p2))
+        else: # p2
+            self.commit('UPDATE games SET p2_wins = p2_wins + 1 WHERE p1=? AND p2=?',
+                        (p1, p2))
 
     def set_board(self, p1: str, p2: str, board: Optional[str]) -> None:
         p1, p2 = sorted([p1, p2])
