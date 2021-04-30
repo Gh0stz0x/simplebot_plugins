@@ -206,35 +206,6 @@ def img5(bot: DeltaBot, payload: str, replies: Replies) -> None:
             replies.add(**reply)
 
 
-@simplebot.command
-def lyrics(payload: str, replies: Replies) -> None:
-    """Get song lyrics.
-    """
-    base_url = 'https://www.lyrics.com'
-    url = "{}/lyrics/{}".format(base_url, quote(payload))
-    with requests.get(url, headers=HEADERS) as r:
-        r.raise_for_status()
-        soup = bs4.BeautifulSoup(r.text, 'html.parser')
-    best_matches = soup.find('div', class_='best-matches')
-    a = best_matches and best_matches.a
-    if not a:
-        soup = soup.find('div', class_='sec-lyric')
-        a = soup and soup.a
-    if a:
-        artist, name = map(unquote_plus, a['href'].split('/')[-2:])
-        url = base_url + a['href']
-        with requests.get(url, headers=HEADERS) as r:
-            r.raise_for_status()
-            soup = bs4.BeautifulSoup(r.text, 'html.parser')
-            lyric = soup.find(id='lyric-body-text')
-            if lyric:
-                text = '🎵 {} - {}\n\n{}'.format(name, artist, lyric.get_text())
-                replies.add(text=text)
-                return
-
-    replies.add(text='No results for: {}'.format(payload))
-
-
 def _getdefault(bot: DeltaBot, key: str, value=None) -> str:
     val = bot.get(key, scope=__name__)
     if val is None and value is not None:
