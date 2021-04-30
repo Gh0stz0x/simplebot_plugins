@@ -24,9 +24,16 @@ def deltabot_init(bot: DeltaBot) -> None:
 def filter_messages(bot: DeltaBot, message: Message, replies: Replies) -> None:
     """Detect messages like +1 or -1 to increase/decrease score.
     """
-    if not message.quote:
-        return
-    score = _parse(message.text)
+    if message.quote:
+        receiver = message.quote.get_sender_contact().addr
+        score = _parse(message.text)
+    else:
+        args = message.text.split(maxsplit=2)
+        if len(args) == 2 and '@' in args[0]:
+            receiver = args[0]
+            score = _parse(args[1])
+        else:
+            score = 0
     if not score:
         return
     sender = message.get_sender_contact().addr
@@ -37,7 +44,6 @@ def filter_messages(bot: DeltaBot, message: Message, replies: Replies) -> None:
         replies.add(text="❌ You can't give what you don't have...",
                     quote=message)
         return
-    receiver = message.quote.get_sender_contact().addr
     if sender == receiver:
         return
 
