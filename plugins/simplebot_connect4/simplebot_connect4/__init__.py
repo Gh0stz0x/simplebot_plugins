@@ -105,6 +105,17 @@ def c4_surrender(message: Message, replies: Replies) -> None:
         text = '🏳️ Game Over.\n{} surrenders.\n\n▶️ Play again? /c4_new'
         replies.add(text=text.format(loser))
 
+@simplebot.command
+def c4_score(message: Message, replies: Replies) -> None:
+    """Get Connect4 cumulative wins
+    """
+    game = db.get_game_by_gid(message.chat.id)
+    # this is not your game group
+    if game is None:
+        replies.add(text='This is not your game group')
+    else:
+        text = '📊 Score:\n{1} {0}\n{3} {2}'
+        replies.add(text=text.format(game['p1'], game['p1_wins'], game['p2'], game['p2_wins']))
 
 @simplebot.command
 def c4_new(message: Message, replies: Replies) -> None:
@@ -156,11 +167,16 @@ def _run_turn(gid: int) -> str:
             text = '🤝 Game over.\nIt is a draw!'
         else:
             if result == BLACK:
+                winner_str = 'p1' if g['black'] == g['p1'] else 'p2'
                 winner = '{} {}'.format(b.get_disc(BLACK), g['black'])
             else:
+                winner_str = 'p2' if g['black'] == g['p1'] else 'p1'
                 p2 = g['p2'] if g['black'] == g['p1'] else g['p1']
                 winner = '{} {}'.format(b.get_disc(WHITE), p2)
-            text = '🏆 Game over.\n{} Wins!'.format(winner)
+            db.set_wins(g['p1'], g['p2'], winner_str)
+            g = db.get_game_by_gid(gid) # to get current wins after this turn
+            text = '🏆 Game over.\n{0} wins!\n\n📊 Score:\n{2} {1}\n{4} {3}'\
+                .format(winner, g['p1'], g['p1_wins'], g['p2'], g['p2_wins'])
         text += '\n\n{}\n\n▶️ Play again? /c4_new'.format(b)
     return text
 
