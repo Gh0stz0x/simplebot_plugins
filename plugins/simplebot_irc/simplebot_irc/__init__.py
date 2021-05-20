@@ -231,7 +231,7 @@ def _get_db(bot) -> DBManager:
     path = os.path.join(os.path.dirname(bot.account.db_path), __name__)
     if not os.path.exists(path):
         os.makedirs(path)
-    return DBManager(os.path.join(path, 'sqlite.db'))
+    return DBManager(bot, os.path.join(path, 'sqlite.db'))
 
 
 def _add_contact(chat: Chat, contact: Contact) -> None:

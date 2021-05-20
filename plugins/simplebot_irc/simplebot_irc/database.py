@@ -4,7 +4,8 @@ from typing import Generator, Optional
 
 
 class DBManager:
-    def __init__(self, db_path: str) -> None:
+    def __init__(self, bot, db_path: str) -> None:
+        self.bot = bot
         self.db = sqlite3.connect(db_path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         with self.db:
@@ -60,12 +61,14 @@ class DBManager:
             'SELECT nick from nicks WHERE addr=?', (addr,)).fetchone()
         if r:
             return r[0]
-        i = 1
+        name = "_".join(self.bot.get_contact(addr).name.encode('ascii',errors='ignore').decode().split())
+        nick = name
+        i = 2
         while True:
-            nick = 'User{}'.format(i)
             if not self.get_addr(nick):
                 self.set_nick(addr, nick)
                 break
+            nick = f'{name}{i}'
             i += 1
         return nick
 
