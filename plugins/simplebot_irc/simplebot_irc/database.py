@@ -1,4 +1,4 @@
-
+import string
 import sqlite3
 from typing import Generator, Optional
 
@@ -61,7 +61,9 @@ class DBManager:
             'SELECT nick from nicks WHERE addr=?', (addr,)).fetchone()
         if r:
             return r[0]
-        name = "_".join(self.bot.get_contact(addr).name.encode('ascii',errors='ignore').decode().split())
+        allowed = string.ascii_letters + string.digits + '_-\[]{}^`|'
+        name = self.bot.get_contact(addr).name
+        name = "".join(list(filter(allowed.__contains__, name)))[:12]
         nick = name
         i = 2
         while True:
@@ -69,6 +71,8 @@ class DBManager:
                 self.set_nick(addr, nick)
                 break
             nick = f'{name}{i}'
+            if len(nick) > 12:
+                nick = name[:len(name)-1]
             i += 1
         return nick
 

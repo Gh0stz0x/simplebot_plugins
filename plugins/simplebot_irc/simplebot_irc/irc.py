@@ -58,7 +58,11 @@ class PuppetReactor(irc.client.SimpleIRCClient):
     # EVENTS:
 
     def on_nicknameinuse(self, c, e) -> None:
-        nick = self.db.get_nick(c.addr) + '_'
+        nick = self.db.get_nick(c.addr)
+        if len(nick) < 12:
+            nick += '_'
+        else:
+            nick = nick[:len(nick)-1]
         self.db.set_nick(c.addr, nick)
         c.nick(nick + '[dc]')
 
