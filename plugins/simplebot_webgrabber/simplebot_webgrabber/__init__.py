@@ -1,4 +1,4 @@
-
+import functools
 import io
 import mimetypes
 import os
@@ -20,9 +20,13 @@ from simplebot.bot import Replies
 
 __version__ = '1.0.0'
 zlib.Z_DEFAULT_COMPRESSION = 9
-ua = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:60.0) Gecko/20100101'
-ua += ' Firefox/60.0'
-HEADERS = {'user-agent': ua}
+session = requests.Session()
+session.headers.update(
+    {
+        "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0"
+    }
+)
+session.request = functools.partial(session.request, timeout=60)
 img_providers: list
 
 
@@ -53,7 +57,7 @@ def filter_messages(bot: DeltaBot, message: Message, replies: Replies) -> None:
         url = url.replace('https://twitter.com', nitter, count=1)
     elif url.startswith('https://mobile.twitter.com/'):
         url = url.replace('https://mobile.twitter.com/', nitter, count=1)
-    with requests.get(url, headers=HEADERS, stream=True) as r:
+    with session.get(url, stream=True) as r:
         r.raise_for_status()
         content_type = r.headers.get('content-type', '').lower()
         if 'text/html' in content_type:
@@ -230,7 +234,7 @@ def _download_images(bot: DeltaBot, query: str, img_count: int) -> list:
     imgs = _get_images(bot, query)
     results = []
     for img_url in imgs[:img_count]:
-        with requests.get(img_url, headers=HEADERS) as r:
+        with session.get(img_url) as r:
             r.raise_for_status()
             filename = 'web' + (get_ext(r) or '.jpg')
             results.append(
@@ -255,7 +259,7 @@ def _get_images(bot: DeltaBot, query: str) -> list:
 def _google_imgs(query: str) -> list:
     url = 'https://www.google.com/search?tbm=isch&sout=1&q={}'.format(
         quote_plus(query))
-    with requests.get(url) as r:
+    with session.get(url) as r:
         r.raise_for_status()
         soup = bs4.BeautifulSoup(r.text, 'html.parser')
     imgs = []
@@ -268,7 +272,7 @@ def _google_imgs(query: str) -> list:
 def _startpage_imgs(query: str) -> list:
     url = 'https://startpage.com/do/search'
     url += '?cat=pics&cmd=process_search&query=' + quote_plus(query)
-    with requests.get(url, headers=HEADERS) as r:
+    with session.get(url) as r:
         r.raise_for_status()
         soup = bs4.BeautifulSoup(r.text, 'html.parser')
         url = r.url
@@ -298,7 +302,7 @@ def _startpage_imgs(query: str) -> list:
 def _dogpile_imgs(query: str) -> list:
     url = 'https://www.dogpile.com/search/images?q={}'.format(
         quote_plus(query))
-    with requests.get(url, headers=HEADERS) as r:
+    with session.get(url) as r:
         r.raise_for_status()
         soup = bs4.BeautifulSoup(r.text, 'html.parser')
     soup = soup.find('div', class_='mainline-results')
@@ -449,7 +453,7 @@ def _download_file(bot: DeltaBot, url: str, mode: str = 'htmlzip',
                    readability: bool = False) -> dict:
     if '://' not in url:
         url = 'http://'+url
-    with requests.get(url, headers=HEADERS, stream=True) as r:
+    with session.get(url, stream=True) as r:
         r.raise_for_status()
         r.encoding = 'utf-8'
         bot.logger.debug(
