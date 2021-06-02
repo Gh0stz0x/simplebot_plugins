@@ -23,6 +23,9 @@ class PuppetReactor(irc.client.SimpleIRCClient):
                 if dbot.self_contact == c:
                     continue
                 self._get_puppet(c.addr).channels.add(chan)
+        for addr, cnn in self.puppets.items():
+            nick = self.db.get_nick(addr) + '[dc]'
+            cnn.connect(self.server, self.port, nick, ircname=nick)
 
     def _get_puppet(self, addr: str) -> irc.client.ServerConnection:
         cnn = self.puppets.get(addr)
@@ -30,8 +33,6 @@ class PuppetReactor(irc.client.SimpleIRCClient):
             cnn = self.reactor.server()
             cnn.channels = set()
             cnn.addr = addr
-            nick = self.db.get_nick(addr) + '[dc]'
-            cnn.connect(self.server, self.port, nick, ircname=nick)
             self.puppets[addr] = cnn
         return cnn
 
