@@ -98,11 +98,10 @@ class IRCBot(irc.bot.SingleServerIRCBot):
         self._irc2dc(e)
 
     def _irc2dc(self, e) -> None:
-        nick = e.source.split('!')[0]
         for cnn in self.preactor.puppets.values():
-            if cnn.get_nickname() == nick:
+            if cnn.get_nickname() == e.source.nick:
                 return
-        sender = '{}[irc]'.format(nick)
+        sender = '{}[irc]'.format(e.source.nick)
         gid = self.db.get_chat(e.target)
         if not gid:
             self.dbot.logger.warning('Chat not found for room: %s', e.target)
