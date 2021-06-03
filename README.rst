@@ -33,7 +33,6 @@ Misc
 - `Echo <https://github.com/simplebot-org/simplebot_echo>`_: Example SimpleBot plugin.
 - `How Do I? <https://github.com/simplebot-org/simplebot_howdoi>`_:  Get instant programming answers in Delta Chat.
 - `Memes EN <https://github.com/simplebot-org/simplebot_memes_en>`_: Get random memes in English.
-- `Memes ES <https://github.com/simplebot-org/simplebot_memes_es>`_: Obtén memes en Español aleatoriamente.
 - `Translator <https://github.com/simplebot-org/simplebot_translator>`_: Allows to translate text from/to several languages.
 - `Wikiquote <https://github.com/simplebot-org/simplebot_wikiquote>`_: Get quotes from Wikiquote.
 - `XKCD <https://github.com/simplebot-org/simplebot_xkcd>`_: See https://xkcd.com/ comics in Delta Chat.
@@ -55,3 +54,4 @@ Misc
 - `Cartelera TV <https://github.com/adbenitez/simplebot_cartv>`_: Muestra la cartelera de la TV cubana.
 - `Cuba Weather <https://github.com/cuba-weather/cuba-weather-simplebot-plugin>`_: Permite obtener el estado del tiempo en Cuba.
 - `Score <https://github.com/adbenitez/simplebot_score>`_: Allows to increase, decrease and track user score/reputation.
+- `Memes ES <https://github.com/adbenitez/simplebot_memes_es>`_: Obtén memes en Español aleatoriamente.
