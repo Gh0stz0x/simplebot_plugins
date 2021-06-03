@@ -13,6 +13,10 @@ class DBManager:
                 '''CREATE TABLE IF NOT EXISTS channels
                 (name TEXT PRIMARY KEY, chat INTEGER)''')
             self.db.execute(
+                '''CREATE TABLE IF NOT EXISTS pvchats
+                (addr TEXT, nick TEXT, chat INTEGER
+                PRIMARY KEY(addr, nick))''')
+            self.db.execute(
                 '''CREATE TABLE IF NOT EXISTS nicks
                 (addr TEXT PRIMARY KEY,
                 nick TEXT NOT NULL)''')
@@ -30,9 +34,29 @@ class DBManager:
     def close(self) -> None:
         self.db.close()
 
+    # ==== pvchats =====
+
+    def get_pvchat(self, addr: str, nick: str) -> int:
+        r = self.execute(
+            'SELECT chat FROM pvchats WHERE addr=? AND nick=?', (addr, nick)).fetchone()
+        if r:
+            return r[0]
+        chat = self.bot.create_group(nick + "[irc]", [addr])
+        self.commit(
+            'INSERT INTO pvchats VALUES (?,?,?)', (addr, nick, chat.id))
+        return chat.id
+
+    def get_pvchat_by_gid(self, gid: int) -> Optional[sqlite3.Row]:
+        r = self.execute(
+            'SELECT * FROM pvchats WHERE chat=?', (gid,)).fetchone()
+        return r and r[0]
+
+    def remove_pvchat(self, addr: str, nick: str) -> None:
+        self.commit('DELETE FROM pvchats WHERE addr=? AND nick=?', (addr, nick))
+
     # ==== channels =====
 
-    def get_chat(self, name: str) -> bool:
+    def get_chat(self, name: str) -> Optional[int]:
         name = name.lower()
         r = self.execute(
             'SELECT chat FROM channels WHERE name=?', (name,)).fetchone()

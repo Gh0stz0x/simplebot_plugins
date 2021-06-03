@@ -23,9 +23,8 @@ class PuppetReactor(irc.client.SimpleIRCClient):
                 if dbot.self_contact == c:
                     continue
                 self._get_puppet(c.addr).channels.add(chan)
-        for addr, cnn in self.puppets.items():
-            nick = self.db.get_nick(addr) + '[dc]'
-            cnn.connect(self.server, self.port, nick, ircname=nick)
+        for addr in self.puppets.keys():
+            self._get_connected_puppet(addr)
 
     def _get_puppet(self, addr: str) -> irc.client.ServerConnection:
         cnn = self.puppets.get(addr)
@@ -36,13 +35,20 @@ class PuppetReactor(irc.client.SimpleIRCClient):
             self.puppets[addr] = cnn
         return cnn
 
-    def join_channel(self, addr: str, channel: str) -> None:
+    def _get_connected_puppet(self, addr: str) -> irc.client.ServerConnection:
         cnn = self._get_puppet(addr)
+        if not cnn.connected:
+            nick = self.db.get_nick(addr) + '[dc]'
+            cnn.connect(self.server, self.port, nick, ircname=nick)
+        return cnn
+
+    def join_channel(self, addr: str, channel: str) -> None:
+        cnn = self._get_connected_puppet(addr)
         cnn.channels.add(channel)
         cnn.join(channel)
 
     def leave_channel(self, addr: str, channel: str) -> None:
-        cnn = self.puppets[addr]
+        cnn = self._get_connected_puppet(addr)
         if channel in cnn.channels:
             cnn.channels.discard(channel)
             cnn.part(channel)
@@ -51,10 +57,21 @@ class PuppetReactor(irc.client.SimpleIRCClient):
                 cnn.close()
 
     def send_message(self, addr: str, target: str, text: str) -> None:
-        self.puppets[addr].privmsg(target, text)
+        self._get_connected_puppet(addr).privmsg(target, text)
 
     def send_action(self, addr: str, target: str, text: str) -> None:
-        self.puppets[addr].action(target, text)
+        self._get_connected_puppet(addr).action(target, text)
+
+    def _irc2dc(self, addr: str, e, impersonate: bool = True) -> None:
+        if impersonate:
+            sender = '{}[irc]'.format(e.source.nick)
+        else:
+            sender = None
+        gid = self.db.get_pvchat(addr, e.source.nick)
+        replies = Replies(self.dbot, logger=self.dbot.logger)
+        replies.add(text=' '.join(e.arguments), sender=sender,
+                    chat=self.dbot.get_chat(gid))
+        replies.send_reply_messages()
 
     # EVENTS:
 
@@ -71,6 +88,17 @@ class PuppetReactor(irc.client.SimpleIRCClient):
     def on_welcome(c, e) -> None:
         for channel in c.channels:
             c.join(channel)
+
+    def on_privmsg(self, c, e) -> None:
+        self._irc2dc(c.addr, e)
+
+    def on_action(self, c, e) -> None:
+        e.arguments.insert(0, '/me')
+        self._irc2dc(c.addr, e)
+
+    def on_nosuchnick(self, c, e) -> None:
+        e.arguments = ["❌ " + ":".join(e.arguments)]
+        self._irc2dc(c.addr, e, impersonate=False)
 
 
 class IRCBot(irc.bot.SingleServerIRCBot):

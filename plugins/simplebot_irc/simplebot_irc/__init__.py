@@ -53,42 +53,55 @@ def deltabot_member_removed(bot: DeltaBot, chat: Chat, contact: Contact) -> None
             irc_bridge.leave_channel(channel)
         else:
             irc_bridge.preactor.leave_channel(contact.addr, channel)
+    pvchat = db.get_pvchat_by_gid(chat.id)
+    if pvchat:
+        me = bot.self_contact
+        if me == contact or len(chat.get_contacts()) <= 1:
+            db.remove_pvchat(pvchat["addr"], pvchat["nick"])
 
 
 @simplebot.filter(name=__name__)
 def filter_messages(message: Message, replies: Replies) -> None:
     """Process messages sent to an IRC channel.
     """
-    chan = db.get_channel_by_gid(message.chat.id)
-    if not chan:
-        return
-
-    if message.quoted_text:
-        text = '<{}> '.format(' '.join(message.quoted_text.split('\n')))
+    target = db.get_channel_by_gid(message.chat.id)
+    if target:
+        addr = message.get_sender_contact().addr
     else:
-        text = ''
-    if message.filename:
-        text += '[File] '
-    text += message.text
-    if not text:
-        return
+        pvchat = db.get_pvchat_by_gid(message.chat.id)
+        if pvchat:
+            target = pvchat["nick"]
+            addr = pvchat["addr"]
+    if target:
+        if message.quoted_text:
+            text = '<{}> '.format(' '.join(message.quoted_text.split('\n')))
+        else:
+            text = ''
+        if message.filename:
+            text += '[File] '
+        text += message.text
+        if not text:
+            return
 
-    addr = message.get_sender_contact().addr
-    irc_bridge.preactor.send_message(
-        addr, chan, ' '.join(text.split('\n')))
+        irc_bridge.preactor.send_message(
+            addr, target, ' '.join(text.split('\n')))
 
 
 @simplebot.command
 def me(payload: str, message: Message, replies: Replies) -> None:
     """Send a message to IRC using the /me IRC command.
     """
-    chan = db.get_channel_by_gid(message.chat.id)
-    if not chan:
-        return
-
-    addr = message.get_sender_contact().addr
-    text = ' '.join(payload.split('\n'))
-    irc_bridge.preactor.send_action(addr, chan, text)
+    target = db.get_channel_by_gid(message.chat.id)
+    if target:
+        addr = message.get_sender_contact().addr
+    else:
+        pvchat = db.get_pvchat_by_gid(message.chat.id)
+        if pvchat:
+            target = pvchat["nick"]
+            addr = pvchat["addr"]
+    if target:
+        text = ' '.join(payload.split('\n'))
+        irc_bridge.preactor.send_action(addr, target, text)
 
 
 @simplebot.command
@@ -137,6 +150,16 @@ def nick(args: list, message: Message, replies: Replies) -> None:
             replies.add(text='** Nick: {}'.format(new_nick))
     else:
         replies.add(text='** Nick: {}'.format(db.get_nick(addr)))
+
+
+@simplebot.command
+def query(bot: DeltaBot, payload: str, message: Message, replies: Replies) -> None:
+    """Open a private chat with an IRC user."""
+    if not payload:
+        replies.add(text="Wrong syntax")
+        return
+    g = bot.get_chat(db.get_pvchat(message.get_sender_contact().addr, payload))
+    replies.add(text=f"**Send messages to {payload} here.**", chat=g)
 
 
 @simplebot.command
