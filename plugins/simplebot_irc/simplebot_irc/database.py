@@ -14,7 +14,7 @@ class DBManager:
                 (name TEXT PRIMARY KEY, chat INTEGER)''')
             self.db.execute(
                 '''CREATE TABLE IF NOT EXISTS pvchats
-                (addr TEXT, nick TEXT, chat INTEGER
+                (addr TEXT, nick TEXT, chat INTEGER,
                 PRIMARY KEY(addr, nick))''')
             self.db.execute(
                 '''CREATE TABLE IF NOT EXISTS nicks
