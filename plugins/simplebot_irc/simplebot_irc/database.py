@@ -49,7 +49,7 @@ class DBManager:
     def get_pvchat_by_gid(self, gid: int) -> Optional[sqlite3.Row]:
         r = self.execute(
             'SELECT * FROM pvchats WHERE chat=?', (gid,)).fetchone()
-        return r and r[0]
+        return r
 
     def remove_pvchat(self, addr: str, nick: str) -> None:
         self.commit('DELETE FROM pvchats WHERE addr=? AND nick=?', (addr, nick))
