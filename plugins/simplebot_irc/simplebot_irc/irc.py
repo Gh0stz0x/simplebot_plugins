@@ -37,7 +37,7 @@ class PuppetReactor(irc.client.SimpleIRCClient):
 
     def _get_connected_puppet(self, addr: str) -> irc.client.ServerConnection:
         cnn = self._get_puppet(addr)
-        if not cnn.connected:
+        if not cnn.is_connected():
             nick = self.db.get_nick(addr) + '[dc]'
             cnn.connect(self.server, self.port, nick, ircname=nick)
         return cnn
