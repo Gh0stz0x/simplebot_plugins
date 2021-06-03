@@ -20,8 +20,8 @@ irc_bridge: IRCBot
 
 @simplebot.hookimpl
 def deltabot_init(bot: DeltaBot) -> None:
-    _getdefault(bot, 'nick', 'SimpleBot')
-    _getdefault(bot, 'host', 'irc.freenode.net')
+    _getdefault(bot, 'nick', 'DC-Bridge')
+    _getdefault(bot, 'host', 'irc.libera.chat')
     _getdefault(bot, 'port', '6667')
 
 
