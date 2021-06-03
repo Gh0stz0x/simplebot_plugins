@@ -1,4 +1,4 @@
-
+import string
 from threading import Thread
 
 import irc.bot
@@ -104,14 +104,23 @@ class PuppetReactor(irc.client.SimpleIRCClient):
 class IRCBot(irc.bot.SingleServerIRCBot):
     def __init__(self, server: str, port: int, nick: str, db: DBManager,
                  dbot: DeltaBot) -> None:
+        nick = sanitize_nick(nick)
+        self.nick = nick
         super().__init__([(server, port)], nick, nick)
         self.dbot = dbot
         self.db = db
         self.preactor = PuppetReactor(server, port, db, dbot)
+        self.nick_counter = 1
 
-    @staticmethod
-    def on_nicknameinuse(c, e) -> None:
-        c.nick(c.get_nickname() + '_')
+
+    def on_nicknameinuse(self, c, e) -> None:
+        self.nick_counter += 1
+        nick = f"{self.nick}{self.nick_counter}"
+        if len(nick) > 16:
+            self.nick = self.nick[:len(self.nick)-1]
+            self.nick_counter = 1
+            nick = self.nick
+        c.nick(nick)
 
     def on_welcome(self, c, e) -> None:
         for chan, _ in self.db.get_channels():
@@ -167,3 +176,8 @@ class IRCBot(irc.bot.SingleServerIRCBot):
 
     def send_message(self, target: str, text: str) -> None:
         self.connection.privmsg(target, text)
+
+
+def sanitize_nick(nick: str) -> str:
+    allowed = string.ascii_letters + string.digits + "_-\[]{}^`|"
+    return "".join(list(filter(allowed.__contains__, nick)))[:16]
