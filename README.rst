@@ -42,6 +42,7 @@ Misc
 - `Polls <https://github.com/simplebot-org/simplebot_polls>`_: Create polls in Delta Chat.
 - `Lyrics <https://github.com/simplebot-org/simplebot_lyrics>`_: Allows users to search for song lyrics.
 - `Stickers <https://github.com/simplebot-org/simplebot_stickers>`_: Allows users to get stickers packs and convert normal images to stickers.
+- `POI <https://github.com/simplebot-org/simplebot_poi>`_: A plugin to detect messages (sent in private or in groups) with map coordinates and reply with a picture of that point in the map.
 - **Chatter:** Transform the bot in a conversational bot with AI.
 - **DeltaFriends:** Provides a directory for users to share their address and biography.
 - **Feeds:** Subscribe to RSS and Atom links.
