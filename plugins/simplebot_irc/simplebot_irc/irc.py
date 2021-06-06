@@ -93,8 +93,9 @@ class PuppetReactor(irc.client.SimpleIRCClient):
         self._irc2dc(c.addr, e)
 
     def on_action(self, c, e) -> None:
-        e.arguments.insert(0, '/me')
-        self._irc2dc(c.addr, e)
+        if not e.target.startswith(tuple("&#+!")):
+            e.arguments.insert(0, "/me")
+            self._irc2dc(c.addr, e)
 
     def on_nosuchnick(self, c, e) -> None:
         e.arguments = ["❌ " + ":".join(e.arguments)]
