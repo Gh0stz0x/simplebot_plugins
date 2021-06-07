@@ -83,8 +83,10 @@ def filter_messages(message: Message, replies: Replies) -> None:
         if not text:
             return
 
-        irc_bridge.preactor.send_message(
-            addr, target, ' '.join(text.split('\n')))
+        text = ' '.join(text.split('\n'))
+        n = 450
+        for fragment in [text[i:i+n] for i in range(0, len(text), n)]:
+            irc_bridge.preactor.send_message(addr, target, fragment)
 
 
 @simplebot.command
