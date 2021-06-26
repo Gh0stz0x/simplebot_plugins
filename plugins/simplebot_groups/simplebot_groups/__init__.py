@@ -300,7 +300,7 @@ def group_join(bot: DeltaBot, args: list, message: Message, replies: Replies) ->
             g = bot.create_group(ch['name'], [sender])
             db.add_cchat(g.id, ch['id'])
             img = bot.get_chat(ch['id']).get_profile_image()
-            if img:
+            if img and os.path.exists(img):
                 g.set_profile_image(img)
             replies.add(text=text.format(
                 ch['name'], ch['topic'] or '-', arg), chat=g)
