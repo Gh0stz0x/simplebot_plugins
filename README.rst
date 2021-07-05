@@ -19,11 +19,11 @@ Games
 - `Dice <https://github.com/simplebot-org/simplebot_dice>`_: Roll dices.
 - `Exquisite Corpse <https://github.com/simplebot-org/simplebot_corpse>`_: Multiplayer game to play with a group of friends.
 - `Chain Reaction <https://github.com/simplebot-org/simplebot_chain_reaction>`_: Chain Reaction board game to play with friends.
+- `Reversi <https://github.com/simplebot-org/simplebot_reversi>`_: Reversi/Othello two players game.
 - **Checkers:** American Checkers game to play with friends.
 - **Chess:** Chess game to play with friends.
 - **Color Lines:** Single player board game.
 - **Minesweeper:** Single player board game.
-- **Reversi:** Reversi/Othello game to play with friends.
 - **Sudoku:** Sudoku single player board game.
 
 Misc
