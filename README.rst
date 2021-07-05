@@ -18,7 +18,7 @@ Games
 - `Connect4 <https://github.com/simplebot-org/simplebot_connect4>`_: Connect Four game to play with friends.
 - `Dice <https://github.com/simplebot-org/simplebot_dice>`_: Roll dices.
 - `Exquisite Corpse <https://github.com/simplebot-org/simplebot_corpse>`_: Multiplayer game to play with a group of friends.
-- **Chain Reaction:** Chain Reaction board game to play with friends.
+- `Chain Reaction <https://github.com/simplebot-org/simplebot_chain_reaction>`_: Chain Reaction board game to play with friends.
 - **Checkers:** American Checkers game to play with friends.
 - **Chess:** Chess game to play with friends.
 - **Color Lines:** Single player board game.
